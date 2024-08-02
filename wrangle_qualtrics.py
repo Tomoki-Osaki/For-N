@@ -16,15 +16,19 @@ def clean_qualtrics_data(df_to_clean: pd.DataFrame) -> pd.DataFrame:
     """
     
     df = df_to_clean.copy()
+    df = df.rename(columns={"Q38_Operating System": "OS"})
     
     # drop unnecessary rows and columns
+    invalid_os = ["iPhone", "Android 10"]
+    df = df.query("OS not in @invalid_os")
+    df = df.sort_values(by=['user_id'], ignore_index=True)
+    
     df = df.loc[2:, 'Q11_1':]
     df = df.dropna()
     # drop user's data who chatted with the bot only once
     id_count = Counter(df['user_id'])
     drop_list = [user_id for user_id, num_ans in id_count.items() if num_ans == 1]
     df = df.query('user_id not in @drop_list')
-    df = df.sort_values(by=['user_id'], ignore_index=True)
     
     # make data numerical in order to compute them
     df['Q4'] = pd.to_numeric(df['Q4'])
@@ -74,6 +78,13 @@ def grouping(df: pd.DataFrame) -> pd.DataFrame:
             df.loc[i, 'AB_CD_EF_GH'] = 'groupEF'
         else:
             df.loc[i, 'AB_CD_EF_GH'] = 'groupGH'
+            
+    df["bot_C_R"] = ''
+    for i, bot in enumerate(df["bot"]):
+        if bot == "c":
+            df.loc[i, "bot_C_R"] = 'c'
+        else:
+            df.loc[i, "bot_C_R"] = "r"
             
     return df
 

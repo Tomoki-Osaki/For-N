@@ -6,7 +6,7 @@ import warnings
 import matplotlib.pyplot as plt
 import seaborn as sns
 warnings.simplefilter('ignore')
-sns.set_theme('talk', rc={'figure.figsize':(12, 8)})
+sns.set_theme('talk', rc={'figure.figsize':(8, 6)})
 
 df = pd.read_csv("added_bots.csv")
 df.head()
@@ -23,16 +23,28 @@ df_panas = df[panas]
 first_df = df.query('exp_count == 1')
 second_df = df.query('exp_count == 2')
 
-df_panas = first_df[panas]
+df_panas1 = first_df[panas]
 df_panas2 = second_df[panas]
 
-df_comp = first_df[["competence", "ABEF_CDGH"]]
-df_warm = first_df[["warmness", "ABEF_CDGH"]]
-df_use = first_df[["usability", "ABEF_CDGH"]]
+df_comp1 = first_df[["competence", "ABEF_CDGH", "bot", "bot_C_R"]]
+df_warm1 = first_df[["warmness", "ABEF_CDGH", "bot", "bot_C_R"]]
+df_use1 = first_df[["usability", "ABEF_CDGH", "bot", "bot_C_R"]]
 
-df_comp2 = second_df[["competence", "ABEF_CDGH"]]
-df_warm2 = second_df[["warmness", "ABEF_CDGH"]]
-df_use2 = second_df[["usability", "ABEF_CDGH"]]
+df_comp2 = second_df[["competence", "ABEF_CDGH", "bot", "bot_C_R"]]
+df_warm2 = second_df[["warmness", "ABEF_CDGH", "bot", "bot_C_R"]]
+df_use2 = second_df[["usability", "ABEF_CDGH", "bot", "bot_C_R"]]
+
+df_comp1.sort_values("bot_C_R", inplace=True)
+df_comp2.sort_values("bot_C_R", inplace=True)
+
+sns.histplot(data=df_comp1, x="competence", hue="bot_C_R", multiple="dodge")
+sns.histplot(data=df_comp2, x="competence", hue="bot_C_R", multiple="dodge")
+
+sns.histplot(data=df_comp1, x="competence", hue="bot", multiple="dodge")
+sns.histplot(data=df_comp2, x="competence", hue="bot", multiple="dodge")
+sns.histplot(data=df_warm1, x="warmness", hue="bot", multiple="dodge")
+sns.histplot(data=df_warm2, x="warmness", hue="bot", multiple="dodge")
+
 
 """
 The effects to see by comparing: 
@@ -62,6 +74,17 @@ sns.boxplot(data=df, y='panas_neg', hue='AB_CD_EF_GH'); plt.show()
 # after chatting with the different types of bots
 df_diff = wq.make_df_of_diff(df, ['panas_pos', 'panas_neg'])
 df_diff.head()
+
+tmp = wq.make_df_of_diff(df, ['competence', 'warmness', 'usability'])
+sns.histplot(data=tmp, x="competence_diff", hue="ABEF_CDGH", multiple="dodge")
+sns.histplot(data=tmp, x="warmness_diff", hue="ABEF_CDGH", multiple="dodge")
+sns.histplot(data=tmp, x="usability_diff", hue="ABEF_CDGH", multiple="dodge")
+group1 = tmp.query('ABEF_CDGH == "groupABEF"')
+group2 = tmp.query("ABEF_CDGH == 'groupCDGH'")
+stats.ttest_ind(group1["competence_diff"], group2["competence_diff"])
+stats.ttest_ind(group1["warmness_diff"], group2["warmness_diff"])
+stats.ttest_ind(group1["usability_diff"], group2["usability_diff"])
+
 
 sns.boxplot(data=df_diff, y='panas_pos_diff', hue='group'); plt.show()
 sns.boxplot(data=df_diff, y='panas_pos_diff', hue='AB_CD_EF_GH'); plt.show()
