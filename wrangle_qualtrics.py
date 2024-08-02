@@ -35,14 +35,6 @@ def clean_qualtrics_data(df_to_clean: pd.DataFrame) -> pd.DataFrame:
     for j in range(43, 62, 2):
         df[f'Q{j}'] = pd.to_numeric(df[f'Q{j}'])
         df[f'Q{j}'].replace(6, 5, inplace=True)
-        
-    # competence = [f'Q{i}' for i in [4, 43, 45]]
-    # warmness = [f'Q{i}' for i in [47, 49, 51]]
-    # usability = [f'Q{i}' for i in [53, 55, 57]]
-
-    # df['competence'] = df.loc[:, competence].mean(axis=1)
-    # df['warmness'] = df.loc[:, warmness].mean(axis=1)
-    # df['usability'] = df.loc[:, usability].mean(axis=1)
 
     return df
 
@@ -101,20 +93,15 @@ def average_scale_scores(df_target: pd.DataFrame) -> pd.DataFrame:
     df = df_target.copy()
         
     # average panas's positive and negative scales, respectively
-    ps = [5, 6, 7, 9, 11, 12, 13, 14]
-    ns = [1, 2, 3, 4, 8, 10, 15, 16]    
-    panas_pos = [f'Q11_{p}' for p in ps]
-    panas_neg = [f'Q11_{n}' for n in ns]
+    panas_pos = [5, 6, 7, 9, 11, 12, 13, 14]
+    panas_neg = [1, 2, 3, 4, 8, 10, 15, 16]    
     
-    competence = [f'Q{i}' for i in [4, 43, 45]]
-    warmness = [f'Q{i}' for i in [47, 49, 51]]
-    usability = [f'Q{i}' for i in [53, 55, 57]]
+    df['panas_pos'] = df[[f'Q11_{p}' for p in panas_pos]].mean(axis=1)
+    df['panas_neg'] = df[[f'Q11_{n}' for n in panas_neg]].mean(axis=1)
     
-    df['panas_pos'] = df[panas_pos].mean(axis=1)
-    df['panas_neg'] = df[panas_neg].mean(axis=1)
-    df['competence'] = df[competence].mean(axis=1)
-    df['warmness'] = df[warmness].mean(axis=1)
-    df['usability'] = df[usability].mean(axis=1)
+    df['competence'] = df[['Q4', 'Q43', 'Q45']].mean(axis=1)
+    df['warmness'] = df[['Q47', 'Q49', 'Q51']].mean(axis=1)
+    df['usability'] = df[['Q53', 'Q55', 'Q57']].mean(axis=1)
     
     df = df.sort_values(by='group').reset_index().drop('index', axis=1)    
     
