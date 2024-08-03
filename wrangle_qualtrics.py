@@ -40,6 +40,10 @@ def clean_qualtrics_data(df_to_clean: pd.DataFrame) -> pd.DataFrame:
     for j in range(43, 62, 2):
         df[f'Q{j}'] = pd.to_numeric(df[f'Q{j}'])
         df[f'Q{j}'].replace(6, 5, inplace=True)
+        
+    df = df.rename(columns={"Q59": "willingness", "Q61": "understanding"})
+        
+    df = df.reset_index().drop('index', axis=1)    
 
     return df
 
@@ -60,7 +64,7 @@ def grouping(df: pd.DataFrame) -> pd.DataFrame:
     df['ABCD_EFGH'] = ""
     df['ABEF_CDGH'] = ""
     df['AB_CD_EF_GH'] = ""
-    df['orderRC'] = ""
+    df['order_of_bot'] = ""
     
     for i, group in enumerate(df['group']):
         
@@ -78,17 +82,17 @@ def grouping(df: pd.DataFrame) -> pd.DataFrame:
         
         if group in ['groupa', 'groupb']:
             df.loc[i, 'AB_CD_EF_GH'] = 'groupAB'
-            df.loc[i, 'orderRC'] = 'C-R'
+            df.loc[i, 'order_of_bot'] = 'C - R'
         elif group in ['groupc', 'groupd']:
-            df.loc[i, 'AB_CD_EF_GH'] = 'groupCD'   
-            df.loc[i, 'orderRC'] = 'R-C'
+            df.loc[i, 'AB_CD_EF_GH'] = 'groupCD'
+            df.loc[i, 'order_of_bot'] = 'R - C'
         elif group in ['groupe', 'groupf']:
             df.loc[i, 'AB_CD_EF_GH'] = 'groupEF'
-            df.loc[i, 'orderRC'] = 'C-R+'
+            df.loc[i, 'order_of_bot'] = 'C - R+'
         else:
             df.loc[i, 'AB_CD_EF_GH'] = 'groupGH'
-            df.loc[i, 'orderRC'] = 'R+-C'
-            
+            df.loc[i, 'order_of_bot'] = 'R+ - C'
+                        
     return df
 
 
