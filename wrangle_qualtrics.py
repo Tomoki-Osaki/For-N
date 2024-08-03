@@ -7,12 +7,13 @@ def clean_qualtrics_data(df_to_clean: pd.DataFrame) -> pd.DataFrame:
     Parameters
     ----------
     df_to_clean : pd.DataFrame
-        dataframe to clean that has columns named 'Q_11_{x}', 'user_id', 'exp_count'
+        dataframe to clean gained from qualrics.
 
     Returns
     -------
     df : pd.DataFrame
-        dataframe after dropping unnecesarry rows and columns, and converting to numeric.
+        dataframe after dropping unnecesarry rows and columns, and converting 
+        evaluation of scales to numeric.
     """
     
     df = df_to_clean.copy()
@@ -53,10 +54,13 @@ def grouping(df: pd.DataFrame) -> pd.DataFrame:
     Returns
     -------
     df : pd.DataFrame
-        dataframe would have new two columns representing the depth of grouping.
+        dataframe would have new columns representing the depth of grouping.
     """
     
-    df['ABCD_EFGH'], df['ABEF_CDGH'], df['AB_CD_EF_GH'] = '', '', ''
+    df['ABCD_EFGH'] = ""
+    df['ABEF_CDGH'] = ""
+    df['AB_CD_EF_GH'] = ""
+    df['orderRC'] = ""
     
     for i, group in enumerate(df['group']):
         
@@ -65,27 +69,48 @@ def grouping(df: pd.DataFrame) -> pd.DataFrame:
         else:
             df.loc[i, 'ABCD_EFGH'] = 'groupEFGH'
         
+        
         if group in ['groupa', 'groupb', 'groupe', 'groupf']:
             df.loc[i, 'ABEF_CDGH'] = 'groupABEF'
         else:
             df.loc[i, 'ABEF_CDGH'] = 'groupCDGH'
         
+        
         if group in ['groupa', 'groupb']:
             df.loc[i, 'AB_CD_EF_GH'] = 'groupAB'
+            df.loc[i, 'orderRC'] = 'C-R'
         elif group in ['groupc', 'groupd']:
             df.loc[i, 'AB_CD_EF_GH'] = 'groupCD'   
+            df.loc[i, 'orderRC'] = 'R-C'
         elif group in ['groupe', 'groupf']:
             df.loc[i, 'AB_CD_EF_GH'] = 'groupEF'
+            df.loc[i, 'orderRC'] = 'C-R+'
         else:
             df.loc[i, 'AB_CD_EF_GH'] = 'groupGH'
+            df.loc[i, 'orderRC'] = 'R+-C'
             
+    return df
+
+
+def combine_R_and_Rep(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Parameters
+    ----------
+    df : pd.DataFrame
+        dataframe must have a column named 'bot'.
+
+    Returns
+    -------
+    df : pd.DataFrame
+        dataframe would have a new column that combined R and R+ bot.
+    """
     df["bot_C_R"] = ''
     for i, bot in enumerate(df["bot"]):
         if bot == "c":
             df.loc[i, "bot_C_R"] = 'c'
         else:
             df.loc[i, "bot_C_R"] = "r"
-            
+
     return df
 
 
@@ -94,12 +119,12 @@ def average_scale_scores(df_target: pd.DataFrame) -> pd.DataFrame:
     Parameters
     ----------
     df_target : pd.DataFrame
-        dataframe that has columns consists of scales.
+        dataframe that has columns consisting scales.
 
     Returns
     -------
     df : pd.DataFrame
-        dataframe has new columns containing averaged values scales.
+        dataframe would have new columns containing averaged values scales.
     """
     df = df_target.copy()
         
@@ -124,7 +149,7 @@ def make_df_of_diff(df: pd.DataFrame, params: list[str]) -> pd.DataFrame:
     Parameters
     ----------
     df : pd.DataFrame
-        dataframe that has a column named 'group'.
+        dataframe must have a column named 'group'.
     params : list[str]
         list of parameters to compute the difference.
 
@@ -155,8 +180,21 @@ def make_df_of_diff(df: pd.DataFrame, params: list[str]) -> pd.DataFrame:
     return df_diff
 
 
-def factor_analyze(n, df):
-    fa = FactorAnalyzer(n_factors=n, rotation=None)
+def factor_analyze(num_components: int, df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Parameters
+    ----------
+    num_components : int
+        number of components to compute factor loadings.
+    df : pd.DataFrame
+        dataframe whose all columns consist of a scale.
+
+    Returns
+    -------
+    loadings_df : pd.DataFrame
+        dataframe have computed factor loadings.
+    """
+    fa = FactorAnalyzer(n_factors=num_components, rotation=None)
     fa.fit(df)
     loadings_df = pd.DataFrame(fa.loadings_)
     

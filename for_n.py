@@ -13,9 +13,17 @@ df.head()
 
 df = wq.clean_qualtrics_data(df)
 df = wq.grouping(df)
+df = wq.combine_R_and_Rep(df)
 df = wq.average_scale_scores(df)
 
 df.head()
+
+# make a dataframe consist of differences of panas scores between before and 
+# after chatting with the different types of bots
+df_diff = wq.make_df_of_diff(
+    df, ['panas_pos', 'panas_neg', 'competence', 'warmness', 'usability']
+)
+df_diff.head()
 
 panas = [f'Q11_{i}' for i in range(1, 17)]
 df_panas = df[panas]
@@ -69,11 +77,6 @@ sns.boxplot(data=df, y='panas_pos', hue='AB_CD_EF_GH'); plt.show()
 sns.boxplot(data=df, y='panas_neg', hue='group'); plt.show()
 sns.boxplot(data=df, y='panas_neg', hue='ABCD_EFGH'); plt.show()
 sns.boxplot(data=df, y='panas_neg', hue='AB_CD_EF_GH'); plt.show()
-
-# make a dataframe consist of differences of panas scores between before and 
-# after chatting with the different types of bots
-df_diff = wq.make_df_of_diff(df, ['panas_pos', 'panas_neg'])
-df_diff.head()
 
 tmp = wq.make_df_of_diff(df, ['competence', 'warmness', 'usability'])
 sns.histplot(data=tmp, x="competence_diff", hue="ABEF_CDGH", multiple="dodge")
